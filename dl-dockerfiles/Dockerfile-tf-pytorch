@@ -1,0 +1,80 @@
+FROM nvidia/cuda:8.0-cudnn6-devel-ubuntu16.04 
+
+RUN echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list
+
+# Add External Dependencies for TensorFlow and DS
+RUN apt-get update && apt-get install -y --no-install-recommends \
+         build-essential \
+         cmake \
+         git \
+         curl \
+         vim \
+         ca-certificates \
+         libnccl2=2.0.5-2+cuda8.0 \
+         libnccl-dev=2.0.5-2+cuda8.0 \
+#         libcupti-dev \
+         libjpeg-dev \
+         libpng-dev &&\
+     rm -rf /var/lib/apt/lists/*
+
+ENV PYTHON_VERSION=3.6
+RUN curl -o ~/miniconda.sh -O  https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh  && \
+     chmod +x ~/miniconda.sh && \
+     ~/miniconda.sh -b -p /opt/conda && \     
+     rm ~/miniconda.sh && \
+#     /opt/conda/bin/conda install conda-build && \
+     /opt/conda/bin/conda create -y --name py$PYTHON_VERSION python=$PYTHON_VERSION pip numpy pyyaml scipy ipython mkl&& \
+     /opt/conda/bin/conda clean -ya 
+ENV PATH /opt/conda/envs/py$PYTHON_VERSION/bin:$PATH
+RUN conda install -y --name py$PYTHON_VERSION -c soumith magma-cuda80
+
+# Install Pytorch Instructions at http://pytorch.org/
+RUN conda install -y --name py$PYTHON_VERSION pytorch torchvision cuda80 -c soumith
+RUN conda install -y --name py$PYTHON_VERSION pandas matplotlib jupyter scikit-learn seaborn dask
+RUN conda install -y --name py$PYTHON_VERSION -c conda-forge altair
+RUN conda install -y --name py$PYTHON_VERSION -c menpo opencv3
+
+# Install TensorFlow GPU Support
+# For CUDA profiling, TensorFlow requires CUPTI.
+ENV LD_LIBRARY_PATH /usr/local/cuda/lib64/stubs:/usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
+RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1
+
+# Install TensorFlow GPU version.
+ENV TENSORFLOW_VERSION 1.3
+RUN pip --no-cache-dir install --upgrade \
+        tensorflow-gpu==${TENSORFLOW_VERSION} \
+#        https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-${TENSORFLOW_VERSION}-cp36-cp36m-linux_x86_64.whl \
+        keras \
+        Pillow \
+        h5py \
+        bcolz
+
+# Open Ports for TensorBoard, Jupyter, and SSH
+EXPOSE 6006
+EXPOSE 8888
+EXPOSE 22
+
+# Set up our notebook config.
+COPY jupyter_notebook_config.py /root/.jupyter/
+
+# Enable Jupyter JS Extensions
+RUN jupyter nbextension enable --py widgetsnbextension
+
+# Add requirements.txt
+ADD requirements.txt .
+
+# Install app requirements
+RUN pip install -r requirements.txt
+
+WORKDIR /workspace
+RUN chmod -R a+w /workspace
+
+# Jupyter has issues with being run directly:
+#   https://github.com/ipython/ipython/issues/7062
+# We just add a little wrapper script.
+COPY run_jupyter.sh /
+
+# Run the command
+# CMD ["/bin/bash"]
+# CMD ["/run_jupyter.sh", "--allow-root"]
+CMD /opt/conda/envs/py$PYTHON_VERSION/bin/jupyter notebook --allow-root

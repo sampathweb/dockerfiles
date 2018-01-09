@@ -1,0 +1,10 @@
+tqdm
+kaggle-cli
+isoweek
+pandas_summary
+torchtext
+graphviz
+sklearn_pandas
+# opencv-python
+git+https://github.com/ncullen93/torchsample.git
+nibabel
