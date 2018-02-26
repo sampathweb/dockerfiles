@@ -8,3 +8,4 @@ sklearn_pandas
 # opencv-python
 git+https://github.com/ncullen93/torchsample.git
 nibabel
+tensorboardX
