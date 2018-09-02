@@ -9,3 +9,6 @@ sklearn_pandas
 git+https://github.com/ncullen93/torchsample.git
 nibabel
 tensorboardX
+s3fs
+python-resize-image
+nltk
