@@ -1,3 +1,7 @@
+Pillow
+h5py
+bcolz
+keras==2.1.5
 tqdm
 kaggle-cli
 isoweek
