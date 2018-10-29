@@ -60,13 +60,9 @@ ENV LD_LIBRARY_PATH /usr/local/cuda/lib64/stubs:/usr/local/cuda/extras/CUPTI/lib
 # Install TensorFlow GPU version.
 ENV TENSORFLOW_VERSION 1.10
 RUN conda install -y --name py$PYTHON_VERSION tensorflow-gpu==${TENSORFLOW_VERSION}
-RUN pip --no-cache-dir install --upgrade \
+# RUN pip --no-cache-dir install --upgrade \
 #        tensorflow-gpu==${TENSORFLOW_VERSION} \
 #        https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-${TENSORFLOW_VERSION}-cp36-cp36m-linux_x86_64.whl \
-        keras \
-        Pillow \
-        h5py \
-        bcolz
 
 # Open Ports for TensorBoard, Jupyter, and SSH
 EXPOSE 6006
@@ -105,7 +101,6 @@ RUN pip install spacy && python -m spacy download en
 # Install PyTorch Nightly
 RUN conda install -y --name py$PYTHON_VERSION -c pytorch pytorch-nightly cuda92
 RUN conda install -y --name py$PYTHON_VERSION -c fastai torchvision-nightly
-RUN echo "test"
 RUN conda install -y --name py$PYTHON_VERSION -c fastai fastai
 
 # Jupyter has issues with being run directly:

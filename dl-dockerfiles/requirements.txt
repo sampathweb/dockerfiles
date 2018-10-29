@@ -16,3 +16,4 @@ tensorboardX
 s3fs
 python-resize-image
 nltk
+awscli
