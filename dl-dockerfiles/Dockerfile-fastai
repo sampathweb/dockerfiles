@@ -30,7 +30,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 
-ENV PYTHON_VERSION=3.6
+ENV PYTHON_VERSION=3.7
 
 RUN curl -o ~/miniconda.sh -O  https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh  && \
      chmod +x ~/miniconda.sh && \
@@ -46,7 +46,7 @@ RUN /opt/conda/bin/conda create -y --name py$PYTHON_VERSION python=$PYTHON_VERSI
 ENV PATH /opt/conda/envs/py$PYTHON_VERSION/bin:$PATH
 # RUN [ “/bin/bash”, “-c”, “source activate py$PYTHON_VERSION"]
 
-RUN conda install -y --name py$PYTHON_VERSION opencv cython 
+RUN conda install -y --name py$PYTHON_VERSION opencv
 RUN conda install -y --name py$PYTHON_VERSION numpy scipy pandas matplotlib jupyter scikit-learn seaborn dask bokeh scikit-image
 
 # Install Pytorch Instructions at http://pytorch.org/
@@ -58,8 +58,8 @@ RUN conda install -y --name py$PYTHON_VERSION numpy scipy pandas matplotlib jupy
 ENV LD_LIBRARY_PATH /usr/local/cuda/lib64/stubs:/usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 
 # Install TensorFlow GPU version.
-ENV TENSORFLOW_VERSION 1.10
-RUN conda install -y --name py$PYTHON_VERSION tensorflow-gpu==${TENSORFLOW_VERSION}
+# ENV TENSORFLOW_VERSION 1.10
+RUN conda install -y --name py$PYTHON_VERSION tensorflow-gpu
 RUN pip --no-cache-dir install --upgrade \
 #        tensorflow-gpu==${TENSORFLOW_VERSION} \
 #        https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-${TENSORFLOW_VERSION}-cp36-cp36m-linux_x86_64.whl \
@@ -101,12 +101,6 @@ RUN pip install -r requirements.txt
 
 # Install Spacy and load en
 RUN pip install spacy && python -m spacy download en
-
-# Install PyTorch Nightly
-RUN conda install -y --name py$PYTHON_VERSION -c pytorch pytorch-nightly cuda92
-RUN conda install -y --name py$PYTHON_VERSION -c fastai torchvision-nightly
-RUN echo "test"
-RUN conda install -y --name py$PYTHON_VERSION -c fastai fastai
 
 # Jupyter has issues with being run directly:
 #   https://github.com/ipython/ipython/issues/7062
