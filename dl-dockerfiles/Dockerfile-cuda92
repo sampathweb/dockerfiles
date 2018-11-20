@@ -26,9 +26,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # RUN echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list
 
-# All EN
-ENV LC_ALL en_US.UTF-8
-ENV LANG en_US.UTF-8
+# Set the locale
+RUN apt-get clean && apt-get update && apt-get install -y locales
+RUN locale-gen en_US.UTF-8
 
 ENV PYTHON_VERSION=3.6
 
@@ -46,6 +46,7 @@ RUN /opt/conda/bin/conda create -y --name py$PYTHON_VERSION python=$PYTHON_VERSI
 ENV PATH /opt/conda/envs/py$PYTHON_VERSION/bin:$PATH
 # RUN [ “/bin/bash”, “-c”, “source activate py$PYTHON_VERSION"]
 
+RUN pip install --upgrade pip
 RUN conda install -y --name py$PYTHON_VERSION opencv cython 
 RUN conda install -y --name py$PYTHON_VERSION numpy scipy pandas matplotlib jupyter scikit-learn seaborn dask bokeh scikit-image
 
@@ -74,9 +75,6 @@ RUN conda install -y --name py$PYTHON_VERSION -c conda-forge altair vega_dataset
 # Set up our notebook config.
 COPY jupyter_notebook_config.py /root/.jupyter/
 
-# Set up our notebook config.
-COPY jupyter_notebook_config.py /root/.jupyter/
-
 # Enable Jupyter JS Extensions
 RUN jupyter nbextension enable --py widgetsnbextension
 # RUN jupyter nbextension enable vega --py --sys-prefix
@@ -88,20 +86,18 @@ RUN chmod -R a+w /workspace
 RUN pip uninstall -y pillow
 RUN pip install pillow-simd
 
-# Add requirements.txt
-ADD requirements.txt .
-
-# Install app requirements
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
-
 # Install Spacy and load en
 RUN pip install spacy && python -m spacy download en
+RUN python -m nltk.downloader wordnet
+
+# Add requirements.txt
+ADD requirements.txt .
+RUN pip install -r requirements.txt
 
 # Install PyTorch Nightly
 RUN conda install -y --name py$PYTHON_VERSION -c pytorch pytorch-nightly cuda92
 RUN conda install -y --name py$PYTHON_VERSION -c fastai torchvision-nightly
-RUN conda install -y --name py$PYTHON_VERSION -c fastai fastai
+RUN conda install -y --name py$PYTHON_VERSION -c fastai fastai==1.0.28
 
 # Jupyter has issues with being run directly:
 #   https://github.com/ipython/ipython/issues/7062
