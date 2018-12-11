@@ -1,4 +1,3 @@
-Pillow
 h5py
 bcolz
 keras==2.1.5
@@ -16,5 +15,4 @@ tensorboardX
 s3fs
 python-resize-image
 nltk
-awscli
 googletrans==2.3

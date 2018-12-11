@@ -88,6 +88,7 @@ RUN pip install pillow-simd
 
 # Install Spacy and load en
 RUN pip install spacy && python -m spacy download en
+RUN pip install nltk
 RUN python -m nltk.downloader wordnet
 
 # Add requirements.txt
